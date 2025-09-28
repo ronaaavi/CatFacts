@@ -1,0 +1,78 @@
+.purr-desc {
+  font-size: 1.125rem; 
+  line-height: 1.6;   
+  max-width: 600px;   
+  margin: 0 auto;     
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: linear-gradient(180deg, #fbeee6 0%, #f7d7a3 100%);
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.purr-title {
+  font-family: 'Luckiest Guy', cursive, sans-serif;
+  font-size: 3rem;
+  color: #a86b1c;
+  margin: 1rem 0 0.5rem 0;
+  letter-spacing: 1px;
+}
+
+.purr-desc {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 2.5rem;
+  margin-top: 0.5rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  justify-content: center;
+  margin: 2rem auto;
+  max-width: 700px;
+}
+
+.card-box {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+
+.card-box:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  background: #fff6fa;
+}
+
+nav button {
+  background: white;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+nav button:hover {   
+  color: #333;          
+  border-color: #c08217 ; 
+}
