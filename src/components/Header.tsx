@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Header() {
   return (
     <header
@@ -36,24 +38,24 @@ export default function Header() {
           flexShrink: 0,
         }}
       >
-        <a
-          href="/"
+        <Link
+          to="/"
           style={{ textDecoration: "none", color: "#333", fontWeight: 400 }}
         >
           Home
-        </a>
-        <a
-          href="/about"
+        </Link>
+        <Link
+          to="/about"
           style={{ textDecoration: "none", color: "#333", fontWeight: 400 }}
         >
           About Us
-        </a>
-        <a
-          href="/cats"
+        </Link>
+        <Link
+          to="/cats"
           style={{ textDecoration: "none", color: "#333", fontWeight: 400 }}
         >
           About Cats
-        </a>
+        </Link>
       </nav>
     </header>
   );
