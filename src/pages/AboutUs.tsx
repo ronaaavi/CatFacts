@@ -22,17 +22,17 @@ export default function AboutUs() {
         id: 1,
         name: "Rona Arbe Limbago",
         role: "Lead Frontend Developer",
-        bio: "Rona is a passionate React developer who loves creating beautiful user interfaces. When she's not coding, she enjoys spending time with her rescue cat, Whiskers.",
+        bio: "Rona is a passionate React developer who loves creating beautiful user interfaces. When she's not coding, she enjoys spending time with her baby, Munchkin.",
         catName: "Munchkin",
         catBreed: "Persian",
         profileImage: "/images/arbe.jpg",
-        catImage: "/images/", 
+        catImage: "/images/munchkin.png", 
       },
       {
         id: 2,
         name: "Anna Alleah Jane Lindo",
         role: "Backend Developer",
-        bio: "Anna specializes in building robust APIs and databases. His cat Luna is his coding companion and loves to sit on his keyboard during late-night debugging sessions.",
+        bio: "Anna specializes in building robust APIs and databases. Her cat Luna is his coding companion and loves to sit on her lap during late-night debugging sessions.",
         catName: "Luna",
         catBreed: "Persian", 
         profileImage: "/images/kai.png",
@@ -63,7 +63,7 @@ export default function AboutUs() {
 
         {loading ? (
           <div style={{ textAlign: "center", padding: "3rem" }}>
-            <p style={{ fontSize: "1.2rem", color: "#a86b1c" }}>Loading our amazing duo... 🐱</p>
+            <p style={{ fontSize: "1.2rem", color: "#a86b1c" }}>Loading........ </p>
           </div>
         ) : (
           <div style={{

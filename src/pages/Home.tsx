@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Card from "../components/Card";
 
 const CARD_COUNT = 12;
@@ -14,6 +14,7 @@ export default function Home() {
 
   // Show the fact for 5 seconds before auto-closing
   const AUTO_CLOSE_DELAY = 5000;
+  const timersRef = useRef<(number | null)[]>(new Array(CARD_COUNT).fill(null));
 
   // Fetch random cat images when component loads
   useEffect(() => {
@@ -50,35 +51,65 @@ export default function Home() {
     };
 
     fetchCatImages();
-  }, []); // Empty dependency array to run only once
+  }, []); 
+
+  
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach(timer => {
+        if (timer) clearTimeout(timer);
+      });
+    };
+  }, []);
 
   const handleCardClick = async (idx: number) => {
     if (cardStates[idx].open) return;
-    const newStates = [...cardStates];
+    
+    // Clear any existing timer for this card
+    if (timersRef.current[idx]) {
+      clearTimeout(timersRef.current[idx]!);
+      timersRef.current[idx] = null;
+    }
 
     try {
       const response = await fetch("https://meowfacts.herokuapp.com/");
       const data = await response.json();
-      newStates[idx].fact = data.data[0];
-      newStates[idx].open = true;
-      setCardStates(newStates);
-      setTimeout(() => {
-        handleCardReset(idx);
+      
+      setCardStates(prevStates => {
+        const newStates = [...prevStates];
+        newStates[idx].fact = data.data[0];
+        newStates[idx].open = true;
+        return newStates;
+      });
+
+      // Set timer to auto-close this specific card
+      timersRef.current[idx] = window.setTimeout(() => {
+        setCardStates(prevStates => {
+          const newStates = [...prevStates];
+          newStates[idx] = { ...newStates[idx], open: false, fact: "" };
+          return newStates;
+        });
+        timersRef.current[idx] = null;
       }, AUTO_CLOSE_DELAY);
+
     } catch {
-      newStates[idx].fact = "Failed to fetch cat fact.";
-      newStates[idx].open = true;
-      setCardStates(newStates);
-      setTimeout(() => {
-        handleCardReset(idx);
+      setCardStates(prevStates => {
+        const newStates = [...prevStates];
+        newStates[idx].fact = "Failed to fetch cat fact.";
+        newStates[idx].open = true;
+        return newStates;
+      });
+
+      // Set timer for error case too
+      timersRef.current[idx] = window.setTimeout(() => {
+        setCardStates(prevStates => {
+          const newStates = [...prevStates];
+          newStates[idx] = { ...newStates[idx], open: false, fact: "" };
+          return newStates;
+        });
+        timersRef.current[idx] = null;
       }, AUTO_CLOSE_DELAY);
     }
-  };
-
-  const handleCardReset = (idx: number) => {
-    const newStates = [...cardStates];
-    newStates[idx] = { ...newStates[idx], open: false, fact: "" };
-    setCardStates(newStates);
   };
 
   return (

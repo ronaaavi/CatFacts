@@ -9,7 +9,10 @@ interface CatBreed {
   life_span: string;
   weight: {
     metric: string;
+    imperial?: string;
   };
+  energy_level?: number;
+  intelligence?: number;
   image?: {
     url: string;
   };
@@ -20,6 +23,7 @@ export default function AboutCats() {
   const [loading, setLoading] = useState(true);
   const [selectedBreed, setSelectedBreed] = useState<CatBreed | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchBreeds = async () => {
@@ -60,6 +64,13 @@ export default function AboutCats() {
 
   const displayedBreeds = showAll ? breeds : breeds.slice(0, 12);
 
+  // Filter breeds based on search term
+  const filteredBreeds = displayedBreeds.filter(breed =>
+    breed.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    breed.life_span.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    breed.origin.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <main style={{ marginTop: "80px", minHeight: "80vh", padding: "2rem" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -75,6 +86,39 @@ export default function AboutCats() {
           <p style={{ fontSize: "1rem", color: "#666" }}>
             Click on any breed below to learn more about these amazing felines.
           </p>
+          
+          {/* Search Bar */}
+          <div style={{ marginTop: "2rem", maxWidth: "500px", margin: "2rem auto 0" }}>
+            <input
+              type="text"
+              placeholder="Search by breed name, lifespan, or origin..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                fontSize: "1rem",
+                borderRadius: "25px",
+                border: "2px solid #f7d7a3",
+                backgroundColor: "#fff",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                outline: "none",
+                transition: "border-color 0.2s"
+              }}
+              onFocus={(e) => e.target.style.borderColor = "#E99B64"}
+              onBlur={(e) => e.target.style.borderColor = "#f7d7a3"}
+            />
+          </div>
+          
+          {/* Search Results Info */}
+          {searchTerm && (
+            <p style={{ fontSize: "0.9rem", color: "#666", marginTop: "1rem" }}>
+              {filteredBreeds.length > 0 
+                ? `Found ${filteredBreeds.length} breed${filteredBreeds.length !== 1 ? 's' : ''} matching "${searchTerm}"`
+                : `No breeds found matching "${searchTerm}"`
+              }
+            </p>
+          )}
         </div>
 
         {loading ? (
@@ -86,41 +130,51 @@ export default function AboutCats() {
             {/* Breed Grid */}
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gridTemplateColumns: searchTerm ? "1fr" : "repeat(auto-fit, minmax(300px, 1fr))",
               gap: "1.5rem",
               marginBottom: "2rem"
             }}>
-              {displayedBreeds.map((breed) => (
+              {filteredBreeds.map((breed) => (
                 <div
                   key={breed.id}
-                  onClick={() => setSelectedBreed(breed)}
+                  onClick={searchTerm ? undefined : () => setSelectedBreed(breed)}
                   style={{
                     background: "#fff",
                     borderRadius: "12px",
                     padding: "1.5rem",
                     boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-                    cursor: "pointer",
+                    cursor: searchTerm ? "default" : "pointer",
                     transition: "transform 0.2s, box-shadow 0.2s",
-                    border: "2px solid #f7d7a3"
+                    border: "2px solid #f7d7a3",
+                    display: searchTerm ? "flex" : "block",
+                    gap: searchTerm ? "1.5rem" : "0"
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-5px)";
-                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
+                    if (!searchTerm) {
+                      e.currentTarget.style.transform = "translateY(-5px)";
+                      e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
+                    if (!searchTerm) {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
+                    }
                   }}
                 >
                   {/* Breed Image */}
                   {breed.image?.url && (
-                    <div style={{ marginBottom: "1rem" }}>
+                    <div style={{ 
+                      marginBottom: searchTerm ? "0" : "1rem",
+                      flexShrink: searchTerm ? "0" : "1",
+                      width: searchTerm ? "300px" : "100%"
+                    }}>
                       <img
                         src={breed.image.url}
                         alt={breed.name}
                         style={{
                           width: "100%",
-                          height: "200px",
+                          height: searchTerm ? "250px" : "200px",
                           objectFit: "cover",
                           borderRadius: "8px",
                           border: "2px solid #f7d7a3"
@@ -129,45 +183,80 @@ export default function AboutCats() {
                     </div>
                   )}
                   
-                  <h3 style={{ color: "#a86b1c", marginBottom: "0.5rem", fontSize: "1.3rem" }}>
-                    {breed.name}
-                  </h3>
-                  <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
-                    <strong>Origin:</strong> {breed.origin}
-                  </p>
-                  <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
-                    <strong>Lifespan:</strong> {breed.life_span} years
-                  </p>
-                  <p style={{ color: "#333", fontSize: "0.95rem", lineHeight: "1.4" }}>
-                    {breed.description.length > 100 
-                      ? `${breed.description.substring(0, 100)}...` 
-                      : breed.description}
-                  </p>
+                  <div style={{ flex: searchTerm ? "1" : "none" }}>
+                    <h3 style={{ color: "#a86b1c", marginBottom: "0.5rem", fontSize: "1.3rem" }}>
+                      {breed.name}
+                    </h3>
+                    <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+                      <strong>Origin:</strong> {breed.origin}
+                    </p>
+                    <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+                      <strong>Lifespan:</strong> {breed.life_span} years
+                    </p>
+                    
+                    {searchTerm ? (
+                      // Show full details when searching
+                      <>
+                        {breed.temperament && (
+                          <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+                            <strong>Temperament:</strong> {breed.temperament}
+                          </p>
+                        )}
+                        {breed.weight && (
+                          <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+                            <strong>Weight:</strong> {breed.weight.metric} kg ({breed.weight.imperial} lbs)
+                          </p>
+                        )}
+                        {breed.energy_level && (
+                          <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+                            <strong>Energy Level:</strong> {breed.energy_level}/5
+                          </p>
+                        )}
+                        {breed.intelligence && (
+                          <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+                            <strong>Intelligence:</strong> {breed.intelligence}/5
+                          </p>
+                        )}
+                        <p style={{ color: "#333", fontSize: "0.95rem", lineHeight: "1.4", marginTop: "1rem" }}>
+                          {breed.description}
+                        </p>
+                      </>
+                    ) : (
+                      // Show truncated description for regular view
+                      <p style={{ color: "#333", fontSize: "0.95rem", lineHeight: "1.4" }}>
+                        {breed.description.length > 100 
+                          ? `${breed.description.substring(0, 100)}...` 
+                          : breed.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
 
             {/* Show More/Less Button */}
-            <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-              <button
-                onClick={() => setShowAll(!showAll)}
-                style={{
-                  background: "#E99B64",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  padding: "0.75rem 2rem",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "background 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "#d48a2f"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "#E99B64"}
-              >
-                {showAll ? `Show Less` : `Show All ${breeds.length} Breeds`}
-              </button>
-            </div>
+            {!searchTerm && (
+              <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+                <button
+                  onClick={() => setShowAll(!showAll)}
+                  style={{
+                    background: "#E99B64",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "0.75rem 2rem",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "background 0.2s"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#d48a2f"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "#E99B64"}
+                >
+                  {showAll ? `Show Less` : `Show All ${breeds.length} Breeds`}
+                </button>
+              </div>
+            )}
           </>
         )}
 
