@@ -10,7 +10,7 @@ type Dev = {
   cat_name?: string; 
   cat_breed?: string; 
   profile_image?: string; 
-  cat_image?: string; 
+  cat_image?: string;
 };
 
 export default function ManageDevelopers() {
@@ -25,7 +25,7 @@ export default function ManageDevelopers() {
     cat_name: string; 
     cat_breed: string; 
     profileImage?: File; 
-    catImage?: File; 
+    catImage?: File;
   }>({ name: '', github: '', role: '', bio: '', cat_name: '', cat_breed: '' });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -54,8 +54,7 @@ export default function ManageDevelopers() {
       bio: d.bio || '', 
       cat_name: d.cat_name || '', 
       cat_breed: d.cat_breed || '', 
-      profileImage: undefined,
-      catImage: undefined
+      profileImage: undefined
     });
     setOpen(true);
   }
@@ -81,21 +80,35 @@ export default function ManageDevelopers() {
     if (form.profileImage) formData.append('profileImage', form.profileImage);
     if (form.catImage) formData.append('catImage', form.catImage);
 
+    console.log('Sending data:', {
+      name: form.name,
+      github: form.github,
+      role: form.role,
+      bio: form.bio,
+      cat_name: form.cat_name,
+      cat_breed: form.cat_breed,
+      hasProfileImage: !!form.profileImage
+    });
+
     try {
       let response;
       if (editing) {
+        console.log('Updating developer:', editing.id);
         response = await api.put(`/developers/${editing.id}`, formData, { 
           headers: { 'Content-Type': 'multipart/form-data' } 
         });
+        console.log('Update response:', response);
         if (response.data && response.data.success) {
           setMessage({ type: 'success', text: 'Developer updated successfully!' });
         } else {
           throw new Error('Invalid response from server');
         }
       } else {
+        console.log('Adding new developer');
         response = await api.post('/developers', formData, { 
           headers: { 'Content-Type': 'multipart/form-data' } 
         });
+        console.log('Add response:', response);
         if (response.data && response.data.success) {
           setMessage({ type: 'success', text: 'Developer added successfully!' });
         } else {
@@ -106,7 +119,8 @@ export default function ManageDevelopers() {
       fetchAll();
       setTimeout(() => setMessage(null), 3000);
     } catch (err: any) { 
-      console.error(err);
+      console.error('Error details:', err);
+      console.error('Error response:', err.response);
       const errorMessage = err.response?.data?.error || err.message || 'Failed to save developer. Please try again.';
       setMessage({ type: 'error', text: errorMessage });
       setTimeout(() => setMessage(null), 3000);

@@ -45,19 +45,27 @@ router.post("/", upload.fields([
   { name: 'profileImage', maxCount: 1 },
   { name: 'catImage', maxCount: 1 }
 ]), async (req, res) => {
+  console.log('POST /api/developers - Request received');
+  console.log('Body:', req.body);
+  console.log('Files:', req.files);
+  
   try {
     const { name, role, github, bio, cat_name, cat_breed } = req.body;
     const profileImagePath = req.files?.profileImage?.[0] ? `/uploads/developers/${req.files.profileImage[0].filename}` : null;
     const catImagePath = req.files?.catImage?.[0] ? `/uploads/developers/${req.files.catImage[0].filename}` : null;
 
+    console.log('Inserting developer:', { name, role, github, bio, cat_name, cat_breed });
+
     const pool = await db.init();
-    await pool.query(
+    const result = await pool.query(
       "INSERT INTO developers (name, role, github, bio, cat_name, cat_breed, profile_image, cat_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [name, role, github || null, bio || null, cat_name || null, cat_breed || null, profileImagePath, catImagePath]
     );
 
+    console.log('Insert result:', result);
     res.json({ success: true, message: "Developer added successfully!" });
   } catch (err) {
+    console.error('Error adding developer:', err);
     res.status(500).json({ error: err.message });
   }
 });

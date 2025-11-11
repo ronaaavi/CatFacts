@@ -66,7 +66,7 @@ export default function Home() {
     }
 
     try {
-      const FACT_API = `${import.meta.env.VITE_API_URL}/api/facts`;
+      const FACT_API = `${import.meta.env.VITE_API_URL}/facts`;
       const response = await fetch(FACT_API);
       const data = await response.json();
 
