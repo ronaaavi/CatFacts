@@ -4,19 +4,58 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import AboutUs from "./pages/AboutUs";
 import AboutCats from "./pages/AboutCats";
+import AdminPanel from "./pages/admin/AdminPanel";
 import "./App.css";
 
 function App() {
   return (
-    <>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/cats" element={<AboutCats />} />
-      </Routes>
-      <Footer />
-    </>
+    <Routes>
+      {/* Home */}
+      <Route
+        path="/"
+        element={
+          <>
+            <Header />
+            <Home />
+            <Footer />
+          </>
+        }
+      />
+
+      {/* About Us */}
+      <Route
+        path="/about"
+        element={
+          <>
+            <Header />
+            <AboutUs />
+            <Footer />
+          </>
+        }
+      />
+
+      {/* About Cats */}
+      <Route
+        path="/cats"
+        element={
+          <>
+            <Header />
+            <AboutCats />
+            <Footer />
+          </>
+        }
+      />
+
+      {/* Admin */}
+      <Route
+        path="/admin/*"
+        element={
+          <>
+            <AdminPanel />
+          </>
+        }
+      />
+    </Routes>
   );
 }
 

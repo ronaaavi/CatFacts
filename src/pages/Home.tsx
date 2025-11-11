@@ -12,7 +12,6 @@ export default function Home() {
     }))
   );
 
-  // Show the fact for 5 seconds before auto-closing
   const AUTO_CLOSE_DELAY = 5000;
   const timersRef = useRef<(number | null)[]>(new Array(CARD_COUNT).fill(null));
 
@@ -20,43 +19,39 @@ export default function Home() {
   useEffect(() => {
     const fetchCatImages = async () => {
       try {
-        const response = await fetch(
-          `https://api.thecatapi.com/v1/images/search?limit=${CARD_COUNT}&size=med`
-        );
+        const CAT_API =
+          import.meta.env.VITE_CAT_API_URL ??
+          "https://api.thecatapi.com/v1/images/search";
+        const response = await fetch(`${CAT_API}?limit=${CARD_COUNT}`);
         const data = await response.json();
-        
-        console.log(`Requested ${CARD_COUNT} images, received ${data.length} images`);
-        
+
         const newStates = [...cardStates];
-        
-        // If we didn't get enough images, make additional requests
-        if (data.length < CARD_COUNT) {
-          const additionalNeeded = CARD_COUNT - data.length;
-          const additionalResponse = await fetch(
-            `https://api.thecatapi.com/v1/images/search?limit=${additionalNeeded}&size=med`
-          );
-          const additionalData = await additionalResponse.json();
-          data.push(...additionalData);
-        }
-        
-        data.forEach((img: any, idx: number) => {
+        (data || []).forEach((img: any, idx: number) => {
           if (idx < CARD_COUNT) {
-            newStates[idx].image = img.url;
+            newStates[idx].image = img?.url || img?.image?.url || "";
           }
         });
+
+        for (let i = 0; i < CARD_COUNT; i++) {
+          if (!newStates[i].image) newStates[i].image = "/images/cat-icon.png";
+        }
+
         setCardStates(newStates);
       } catch (error) {
-        console.error('Failed to fetch cat images:', error);
+        console.error("Failed to fetch cat images:", error);
+        setCardStates((prev) =>
+          prev.map((s) => ({ ...s, image: s.image || "/images/cat-icon.png" }))
+        );
       }
     };
 
     fetchCatImages();
-  }, []); 
+  }, []);
 
-  
+  // Clear timers on unmount
   useEffect(() => {
     return () => {
-      timersRef.current.forEach(timer => {
+      timersRef.current.forEach((timer) => {
         if (timer) clearTimeout(timer);
       });
     };
@@ -64,45 +59,52 @@ export default function Home() {
 
   const handleCardClick = async (idx: number) => {
     if (cardStates[idx].open) return;
-    
-    // Clear any existing timer for this card
+
     if (timersRef.current[idx]) {
       clearTimeout(timersRef.current[idx]!);
       timersRef.current[idx] = null;
     }
 
     try {
-      const response = await fetch("https://meowfacts.herokuapp.com/");
+      const FACT_API = `${import.meta.env.VITE_API_URL}/api/facts`;
+      const response = await fetch(FACT_API);
       const data = await response.json();
-      
-      setCardStates(prevStates => {
+
+      let factText = "No fact available";
+
+      if (Array.isArray(data) && data.length > 0) {
+        const randomIndex = Math.floor(Math.random() * data.length);
+        factText = data[randomIndex].fact;
+      } else if (data.fact) {
+        factText = data.fact;
+      }
+
+      setCardStates((prevStates) => {
         const newStates = [...prevStates];
-        newStates[idx].fact = data.data[0];
+        newStates[idx].fact = factText;
         newStates[idx].open = true;
         return newStates;
       });
 
-      // Set timer to auto-close this specific card
       timersRef.current[idx] = window.setTimeout(() => {
-        setCardStates(prevStates => {
+        setCardStates((prevStates) => {
           const newStates = [...prevStates];
           newStates[idx] = { ...newStates[idx], open: false, fact: "" };
           return newStates;
         });
         timersRef.current[idx] = null;
       }, AUTO_CLOSE_DELAY);
-
-    } catch {
-      setCardStates(prevStates => {
+    } catch (err) {
+      console.error("Error fetching cat fact:", err);
+      setCardStates((prevStates) => {
         const newStates = [...prevStates];
         newStates[idx].fact = "Failed to fetch cat fact.";
         newStates[idx].open = true;
         return newStates;
       });
 
-      // Set timer for error case too
       timersRef.current[idx] = window.setTimeout(() => {
-        setCardStates(prevStates => {
+        setCardStates((prevStates) => {
           const newStates = [...prevStates];
           newStates[idx] = { ...newStates[idx], open: false, fact: "" };
           return newStates;
